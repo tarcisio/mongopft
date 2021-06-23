@@ -45,7 +45,7 @@ func TestThread(ctx context.Context, dsn string) error {
 			if err != nil {
 				return err
 			}
-			fmt.Print(mychar)
+			fmt.Println(mychar)
 		case <-ctx.Done():
 			fmt.Println("halted operation")
 		}
