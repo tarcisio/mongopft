@@ -27,8 +27,8 @@ func NewTestDocument() TestDocument {
 	}
 }
 
-func TestThread(ctx context.Context, hostname, port string) error {
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%s", hostname, port)))
+func TestThread(ctx context.Context, dsn string) error {
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(dsn))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,12 +38,17 @@ func TestThread(ctx context.Context, hostname, port string) error {
 
 	mychar := randCliChar()
 	for {
-		dc := NewTestDocument()
-		_, err := collection.InsertOne(ctx, dc)
-		if err != nil {
-			return err
+		select {
+		case <-time.After(1 * time.Millisecond):
+			dc := NewTestDocument()
+			_, err := collection.InsertOne(ctx, dc)
+			if err != nil {
+				return err
+			}
+			fmt.Print(mychar)
+		case <-ctx.Done():
+			fmt.Println("halted operation")
 		}
-		fmt.Print(mychar)
 	}
 	return nil
 }
